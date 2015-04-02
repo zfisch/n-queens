@@ -24,6 +24,10 @@
       }, this);
     },
 
+    boardLength: function(){
+      return this.rows().length;
+    },
+
     togglePiece: function(rowIndex, colIndex) {
       this.get(rowIndex)[colIndex] = + !this.get(rowIndex)[colIndex];
       this.trigger('change');
@@ -79,13 +83,9 @@
     //
     // test if a specific row on this board contains a conflict
     hasRowConflictAt: function(row) {
-      var numPieces = 0;
-      for(var i=0; i<row.length; i++){
-        if(row[i] === 1){
-          numPieces++;
-        }
-      }
-      return numPieces > 1;
+      return _.reduce(row, function(val, total){
+        return (val + total)
+      }, 0) > 1
     },
 
     // test if any rows on this board contain conflicts
@@ -131,13 +131,29 @@
     // --------------------------------------------------------------
     //
     // test if a specific major diagonal on this board contains a conflict
-    hasMajorDiagonalConflictAt: function(majorDiagonalColumnIndexAtFirstRow) {
-      return false; // fixme
+    hasMajorDiagonalConflictAt: function(row, col) {
+      var numPieces = 0;
+      //loop through all spaces in diag and check for pieces
+      while(this._isInBounds(row,col)){
+        if(this.rows()[row][col] === 1){
+          numPieces++;
+        }
+        row++, col++;
+      }
+
+      return numPieces > 1;
     },
 
     // test if any major diagonals on this board contain conflicts
     hasAnyMajorDiagonalConflicts: function() {
-      return false; // fixme
+      var arr = [];
+      for(var i = 0; i < this.boardLength(); i++){
+        arr.push([0, i]);
+        arr.push([i, 0]);
+      }
+      return _.some(arr, function(coordinate){
+        return this.hasMajorDiagonalConflictAt(coordinate[0], coordinate[1]);
+      }, this);
     },
 
 
@@ -146,13 +162,29 @@
     // --------------------------------------------------------------
     //
     // test if a specific minor diagonal on this board contains a conflict
-    hasMinorDiagonalConflictAt: function(minorDiagonalColumnIndexAtFirstRow) {
-      return false; // fixme
+    hasMinorDiagonalConflictAt: function(row, col) {
+      var numPieces = 0;
+      //loop through all spaces in diag and check for pieces
+      while(this._isInBounds(row,col)){
+        if(this.rows()[row][col] === 1){
+          numPieces++;
+        }
+        row++, col--;
+      }
+
+      return numPieces > 1;
     },
 
     // test if any minor diagonals on this board contain conflicts
     hasAnyMinorDiagonalConflicts: function() {
-      return false; // fixme
+      var arr = [];
+      for(var i = 0; i < this.boardLength(); i++){
+        arr.push([0, i]);
+        arr.push([i, this.boardLength()-1]);
+      }
+      return _.some(arr, function(coordinate){
+        return this.hasMinorDiagonalConflictAt(coordinate[0], coordinate[1]);
+      }, this);
     }
 
     /*--------------------  End of Helper Functions  ---------------------*/
